@@ -6,6 +6,7 @@ import kafka.consumer.ConsumerIterator;
 import kafka.message.MessageAndMetadata;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,10 @@ public class KafkaTest {
             public void afterReceive(ConsumerIterator<byte[], byte[]> iterator) {
                 while (iterator.hasNext()) {
                     MessageAndMetadata<byte[],byte[]> mm = iterator.next();
-                    System.out.println(" message:"+(new String(mm.message())));
+                    String message = new String(mm.message());
+                    System.out.println(" message:"+message);
+                    JSONObject json = new JSONObject(message);
+                    System.out.println("aaa");
                 }
             }
         },"test222", "test", 3);

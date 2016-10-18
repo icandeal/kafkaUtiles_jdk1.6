@@ -31,12 +31,16 @@ public class PooledKafka implements InitializingBean {
     public PooledKafka (){}
 
     public void initPooled(Properties config){
-        this.config = config;
-        pool = new GenericObjectPool<Producer>(new KafkaPooledProducerFactory(config));
-        pool.setMaxIdle(config.containsKey("pool.maxIdle")? Integer.parseInt(config.getProperty("pool.maxIdle")) : 10);
-        pool.setMinIdle(config.containsKey("pool.minIdle")? Integer.parseInt(config.getProperty("pool.minIdle")) : 3);
-        pool.setMaxTotal(config.containsKey("pool.maxTotal")? Integer.parseInt(config.getProperty("pool.maxTotal")) : 500);
-        pool.setMaxWaitMillis(config.containsKey("pool.maxWaitMillis")? Integer.parseInt(config.getProperty("pool.maxWaitMillis")) : 100000);
+        synchronized (this) {
+            if(this.pool == null) {
+                this.config = config;
+                pool = new GenericObjectPool<Producer>(new KafkaPooledProducerFactory(config));
+                pool.setMaxIdle(config.containsKey("pool.maxIdle") ? Integer.parseInt(config.getProperty("pool.maxIdle")) : 10);
+                pool.setMinIdle(config.containsKey("pool.minIdle") ? Integer.parseInt(config.getProperty("pool.minIdle")) : 3);
+                pool.setMaxTotal(config.containsKey("pool.maxTotal") ? Integer.parseInt(config.getProperty("pool.maxTotal")) : 500);
+                pool.setMaxWaitMillis(config.containsKey("pool.maxWaitMillis") ? Integer.parseInt(config.getProperty("pool.maxWaitMillis")) : 100000);
+            }
+        }
     }
 
     public boolean send(String topic, String key, String value) {
