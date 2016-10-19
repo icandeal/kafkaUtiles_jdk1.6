@@ -1,20 +1,13 @@
 package com.ycf;
 
-import com.ycf.ConsumerCallback;
-import com.ycf.PooledKafka;
 import kafka.consumer.ConsumerIterator;
 import kafka.message.MessageAndMetadata;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -32,7 +25,10 @@ public class KafkaTest {
 
     @Test
     public void doSend(){
-        Assert.assertTrue(pooledKafka.send("test", "ffff", "飞娃儿额"));
+        for(int i = 0; i <=200; i++) {
+            pooledKafka.send("test", "ttt="+i);
+        }
+        Assert.assertTrue(true);
     }
 
     @Test

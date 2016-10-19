@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
 /**
  * Created by sniper on 16-10-12.
@@ -27,7 +26,7 @@ public class PooledKafka implements InitializingBean {
     private GenericObjectPool<Producer> pool;
     private Resource configLocation;
     private Properties config;
-
+    private Producer producer;
     public PooledKafka (){}
 
     public void initPooled(Properties config){
@@ -48,9 +47,16 @@ public class PooledKafka implements InitializingBean {
 
         if (pool != null) {
             try {
-                pool.borrowObject().send(message);
+                producer = pool.borrowObject();
+                producer.send(message);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e);
+            } finally {
+                try {
+                    pool.returnObject(producer);
+                } catch (Exception e) {
+                    logger.error(e);
+                }
             }
             return true;
         }
@@ -58,17 +64,7 @@ public class PooledKafka implements InitializingBean {
     }
 
     public boolean send(String topic, String value) {
-        KeyedMessage<String, String> message = new KeyedMessage<String, String>(topic, value);
-
-        if (pool != null) {
-            try {
-                pool.borrowObject().send(message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        }
-        return false;
+        return send(topic, null, value);
     }
 
     public void receive(ConsumerCallback callback, String groupId, String topic, Integer numPartitions) {
